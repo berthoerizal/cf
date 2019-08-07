@@ -15,6 +15,8 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
+$router->post('/login', 'AuthController@postLogin');
+
 $router->group(['prefix' => 'v1'], function () use ($router) {
     $router->get('/users', 'UsersController@index');
     $router->post('/users', 'UsersController@store');
