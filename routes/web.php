@@ -14,3 +14,10 @@
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
+
+$router->group(['prefix' => 'v1'], function () use ($router) {
+    $router->get('/users', 'UsersController@index');
+    $router->post('/users', 'UsersController@store');
+    $router->patch('/users/{id}', 'UsersController@update');
+    $router->delete('/users/{id}', 'UsersController@delete');
+});
