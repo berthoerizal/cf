@@ -16,6 +16,7 @@ $router->get('/', function () use ($router) {
 });
 
 $router->post('/login', 'AuthController@postLogin');
+$router->post('/logout', 'AuthController@postLogout');
 
 $router->group(['prefix' => 'v1'], function () use ($router) {
     $router->get('/users', 'UsersController@index');
