@@ -1,0 +1,19 @@
+m
+admins {id, group_id, username, password, api_token, admin_email, admin_name, admin_phone_number}
+admin_groups {id, group_name, group_desc}
+menus {id, menu_code, menu_name, menu_desc, menu_ref_id}
+menu_groups {id, admin_group_id, menu_id, mgroup_status, mgroup_r, mgroup_c, mgroup_u, mgroup_d, mgroup_a}
+
+Insert admin_group ......
+select menu {
+ insert menu_group admin_group_id, menu_id
+}
+
+entitas {id, entitas_code, entitas_name, entitas_desc, entitas_status}
+departemens {id, departemen_code, departemen_name, departemen_desc, departemen_status}
+positions {id, departemen_id, position_name, position_desc, position_status}
+
+users {id, postion_id(boleh null), username, password, api_token, user_fullname, user_email, user_phone_number, user_ktp, user_photo_ktp, user_photo}
+projects {id, admin_id, project_name, project_desc, project_short_desc, project_min_modal, project_sharingp, project_total, project_date, project_duration, project_start_date, project_status}
+invests {id, project_id, user_id, invest_paid_capital, invest_duration}
+installments {id, invest_id, i_no,  i_principal,  i_sprofit, i_total, i_remaining, i_date, i_date_pay, i_status}
