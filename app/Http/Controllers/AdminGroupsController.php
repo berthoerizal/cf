@@ -87,7 +87,7 @@ class AdminGroupsController extends Controller
         }
     }
 
-    public function destroy(Request $request, $id)
+    public function destroy($id)
     {
         $admin_groups = DB::table('admin_groups')->where('id', $id)->delete();
 

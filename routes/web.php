@@ -31,4 +31,8 @@ $router->group(['prefix' => 'v1'], function () use ($router) {
     $router->post('/admin-groups', 'AdminGroupsController@store');
     $router->patch('/admin-groups/{id}', 'AdminGroupsController@update');
     $router->delete('/admin-groups/{id}', 'AdminGroupsController@destroy');
+    $router->get('/menus', 'MenusController@index');
+    $router->post('/menus', 'MenusController@store');
+    $router->patch('/menus/{id}', 'MenusController@update');
+    $router->delete('/menus/{id}', 'MenusController@destroy');
 });
