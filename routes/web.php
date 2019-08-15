@@ -35,4 +35,7 @@ $router->group(['prefix' => 'v1'], function () use ($router) {
     $router->post('/menus', 'MenusController@store');
     $router->patch('/menus/{id}', 'MenusController@update');
     $router->delete('/menus/{id}', 'MenusController@destroy');
+    $router->get('/menu-groups', 'MenuGroupsController@index');
+    $router->get('/menu-groups/{id}', 'MenuGroupsController@show');
+    $router->patch('/menu-groups/{id}', 'MenuGroupsController@update');
 });
