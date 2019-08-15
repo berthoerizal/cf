@@ -15,7 +15,7 @@ class AdminsController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('jwt.auth');
+        // $this->middleware('jwt.auth');
     }
 
     public function index()
@@ -40,8 +40,8 @@ class AdminsController extends Controller
     public function store(Request $request)
     {
         // admins {id, group_id, username, password, api_token, admin_email, admin_name, admin_phone_number}
-        $group_id = NULL;
         $api_token = NULL;
+        $group_id = $request->json()->get('group_id');
         $username = $request->json()->get('username');
         $password = $request->json()->get('password');
         $admin_email = $request->json()->get('admin_email');

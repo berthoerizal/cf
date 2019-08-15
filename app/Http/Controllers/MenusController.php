@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use App\Menu;
+use App\Menu_group;
 
 class MenusController extends Controller
 {
@@ -14,12 +16,12 @@ class MenusController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('jwt.auth');
+        // $this->middleware('jwt.auth');
     }
 
     public function index()
     {
-        $menus = DB::table('menus')->get();
+        $menus = Menu::all();
 
         if (!$menus) {
             return response()->json([
@@ -44,12 +46,12 @@ class MenusController extends Controller
         $menu_desc = $request->json()->get('menu_desc');
         $menu_ref_id = $request->json()->get('menu_ref_id');
 
-        $menus = DB::table('menus')->insert([
-            'menu_code' => $menu_code,
-            'menu_name' => $menu_name,
-            'menu_desc' => $menu_desc,
-            'menu_ref_id' => $menu_ref_id
-        ]);
+        $menus = new Menu;
+        $menus->menu_code = $menu_code;
+        $menus->menu_name = $menu_name;
+        $menus->menu_desc = $menu_desc;
+        $menus->menu_ref_id = $menu_ref_id;
+        $menus->save();
 
         if (!$menus) {
             return response()->json([
@@ -73,12 +75,12 @@ class MenusController extends Controller
         $menu_desc = $request->json()->get('menu_desc');
         $menu_ref_id = $request->json()->get('menu_ref_id');
 
-        $menus = DB::table('menus')->where('id', $id)->update([
-            'menu_code' => $menu_code,
-            'menu_name' => $menu_name,
-            'menu_desc' => $menu_desc,
-            'menu_ref_id' => $menu_ref_id
-        ]);
+        $menus = Menu::find($id);
+        $menus->menu_code = $menu_code;
+        $menus->menu_name = $menu_name;
+        $menus->menu_desc = $menu_desc;
+        $menus->menu_ref_id = $menu_ref_id;
+        $menus->save();
 
         if (!$menus) {
             return response()->json([
@@ -88,7 +90,7 @@ class MenusController extends Controller
             ], 401);
         } else {
             return response()->json([
-                'success' => false,
+                'success' => true,
                 'message' => 'Menu berhasil diubah',
                 'data' => $menus
             ], 200);
@@ -97,7 +99,8 @@ class MenusController extends Controller
 
     public function destroy($id)
     {
-        $menus = DB::table('menus')->where('id', $id)->delete();
+        $menus = Menu::find($id);
+        $menus->delete();
 
         if (!$menus) {
             return response()->json([
@@ -106,9 +109,29 @@ class MenusController extends Controller
                 'data' => ''
             ], 401);
         } else {
+            Menu_group::where('menu_id', $id)->delete();
             return response()->json([
                 'success' => true,
                 'message' => 'Menu berhasil dihapus',
+                'data' => $menus
+            ], 200);
+        }
+    }
+
+    public function restore()
+    {
+        $menus = Menu::withTrashed()->restore();
+
+        if (!$menus) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Menu gagal dikembalikan',
+                'data' => ''
+            ], 401);
+        } else {
+            return response()->json([
+                'success' => true,
+                'message' => 'Menu berhasil dikembalikan',
                 'data' => $menus
             ], 200);
         }

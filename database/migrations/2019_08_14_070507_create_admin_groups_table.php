@@ -18,6 +18,7 @@ class CreateAdminGroupsTable extends Migration
             $table->bigIncrements('id');
             $table->string('group_name');
             $table->text('group_desc');
+            $table->timestamps('deleted_at')->nullable();
             $table->timestamps();
         });
     }

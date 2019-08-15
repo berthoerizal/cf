@@ -20,6 +20,7 @@ class CreateMenusTable extends Migration
             $table->string('menu_name');
             $table->string('menu_desc');
             $table->bigInteger('menu_ref_id');
+            $table->timestamps('deleted_at')->nullable();
             $table->timestamps();
         });
     }

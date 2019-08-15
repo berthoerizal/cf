@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Menu_group;
 
 class MenuGroupsController extends Controller
 {
@@ -19,7 +20,7 @@ class MenuGroupsController extends Controller
 
     public function index()
     {
-        $menu_groups = DB::table('menu_groups')->get();
+        $menu_groups = Menu_group::all();
 
         if (!$menu_groups) {
             return response()->json([
@@ -38,7 +39,7 @@ class MenuGroupsController extends Controller
 
     public function show($id)
     {
-        $menu_groups = DB::table('menu_groups')->where('admin_group_id', $id)->get();
+        $menu_groups = Menu_group::where('admin_group_id', $id)->get();
 
         if (!$menu_groups) {
             return response()->json([
@@ -65,14 +66,14 @@ class MenuGroupsController extends Controller
         $mgroup_d = $request->json()->get('mgroup_d');
         $mgroup_a = $request->json()->get('mgroup_a');
 
-        $menu_groups = DB::table('menu_groups')->where('id', $id)->update([
-            'mgroup_status' => $mgroup_status,
-            'mgroup_r' => $mgroup_r,
-            'mgroup_c' => $mgroup_c,
-            'mgroup_u' => $mgroup_u,
-            'mgroup_d' => $mgroup_d,
-            'mgroup_a' => $mgroup_a
-        ]);
+        $menu_groups = Menu_group::find($id);
+        $menu_groups->mgroup_status = $mgroup_status;
+        $menu_groups->mgroup_r = $mgroup_r;
+        $menu_groups->mgroup_c = $mgroup_c;
+        $menu_groups->mgroup_u = $mgroup_u;
+        $menu_groups->mgroup_d = $mgroup_d;
+        $menu_groups->mgroup_a = $mgroup_a;
+        $menu_groups->save();
 
         if (!$menu_groups) {
             return response()->json([

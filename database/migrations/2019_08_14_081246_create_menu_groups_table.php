@@ -24,6 +24,7 @@ class CreateMenuGroupsTable extends Migration
             $table->boolean('mgroup_u');
             $table->boolean('mgroup_d');
             $table->boolean('mgroup_a');
+            $table->timestamps('deleted_at')->nullable();
             $table->timestamps();
         });
     }
