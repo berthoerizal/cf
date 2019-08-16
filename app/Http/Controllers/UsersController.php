@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\User;
 
 class UsersController extends Controller
 {
@@ -15,12 +16,12 @@ class UsersController extends Controller
      */
     public function __construct()
     {
-        // $this->middleware('jwt.auth');
+        $this->middleware('jwt.auth');
     }
 
     public function index()
     {
-        $users = DB::table('users')->get();
+        $users = User::all();
 
         if (!$users) {
             return response()->json([
@@ -39,66 +40,177 @@ class UsersController extends Controller
 
     public function store(Request $request)
     {
-        $nama = $request->json()->get('nama');
-        $email = $request->json()->get('email');
-        $username = $request->json()->get('username');
-        $password = $request->json()->get('password');
-        $api_token = NULL;
+        // users {id, position_id(boleh null), username, password, api_token, user_fullname, user_email, user_phone_number, user_ktp, user_photo_ktp = photo1, user_photo = photo2}
+        // $user_photo_ktp = $request->photo1;
+        $user_photo_ktp = $request->file('photo1');
+        $user_photo = $request->file('photo2');
+        if ($user_photo_ktp || $user_photo) {
 
-        $users = DB::table('users')->insert([
-            'nama' => $nama,
-            'email' => $email,
-            'username' => $username,
-            'password' => Hash::make($password),
-            'api_token' => $api_token
-        ]);
+            // $exploded = explode(',', $user_photo_ktp);
 
-        if (!$users) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User gagal ditambah',
-                'data' => ''
-            ], 401);
-        } else {
-            return response()->json([
-                'success' => true,
-                'message' => 'User berhasil ditambah',
-                'data' => $users
-            ], 200);
+            // $decoded = base64_decode($exploded[1]);
+
+            // if (str_contains($exploded[0], 'jpeg')) {
+            //     $extension = 'jpg';
+            // } else {
+            //     $extension = 'png';
+            // }
+
+            // $filename = time() . str_random() . '.' . $extension;
+            // $path = public_path() . '/upload/image/' . $filename;
+
+            // if (file_put_contents($path, $decoded)) {
+
+            $filename1 = uniqid() . $user_photo_ktp->getClientOriginalName();
+            $filename2 = uniqid() . $user_photo->getClientOriginalName();
+            if (($user_photo_ktp->move(storage_path('') . '/../public/upload/image/', $filename1)) && ($user_photo->move(storage_path('') . '/../public/upload/image/', $filename2))) {
+
+                $users = new User;
+                $users->position_id = $request->position_id;
+                $users->username = $request->username;
+                $users->password = Hash::make($request->password);
+                $users->api_token = NULL;
+                $users->user_fullname = $request->user_fullname;
+                $users->user_email = $request->user_email;
+                $users->user_phone_number = $request->user_phone_number;
+                $users->user_ktp = $request->user_ktp;
+                $users->user_photo_ktp = $filename1;
+                $users->user_photo = $filename2;
+                $users->save();
+
+                if (!$users) {
+                    return response()->json([
+                        'success'   => false,
+                        'message'   => 'User gagal ditambah',
+                        'data'      => ''
+                    ], 401);
+                } else {
+                    return response()->json([
+                        'success'   => true,
+                        'message'   => 'User berhasil ditambah',
+                        'data'      => $users
+                    ], 200);
+                }
+            } else {
+                return response()->json([
+                    'success'   => false,
+                    'message'   => 'Photo KTP gagal dimasukkan',
+                    'data'      => ''
+                ], 400);
+            }
         }
     }
 
     public function update(Request $request, $id)
     {
-        $nama = $request->json()->get('nama');
-        $email = $request->json()->get('email');
-        $username = $request->json()->get('username');
-        $password = $request->json()->get('password');
+        // users {id, position_id(boleh null), username, password, api_token, user_fullname, user_email, user_phone_number, user_ktp, user_photo_ktp = photo1, user_photo = photo2}
 
-        $users = DB::table('users')->where('id', $id)->update([
-            'nama' => $nama,
-            'email' => $email,
-            'username' => $username,
-            'password' => $password
-        ]);
+        // $user_photo_ktp = $request->photo1;
 
-        if (!$users) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User gagal diubah',
-                'data' => ''
-            ], 401);
+        $user_photo_ktp = $request->file('photo1');
+        $user_photo = $request->file('photo2');
+        if (!$user_photo && !$user_photo_ktp) {
+            $users = DB::table('users')->where('id', $id)->update([
+                'position_id' => $request->position_id,
+                'username' => $request->username,
+                'password' => Hash::make($request->password),
+                'user_fullname' => $request->user_fullname,
+                'user_email' => $request->user_email,
+                'user_phone_number' => $request->user_phone_number,
+                'user_ktp' => $request->user_ktp
+            ]);
+
+            if (!$users) {
+                return response()->json([
+                    'success'   => false,
+                    'message'   => 'User gagal diubah',
+                    'data'      => ''
+                ], 500);
+            } else {
+                return response()->json([
+                    'success'   => true,
+                    'message'   => 'User berhasil diubah',
+                    'data'      => $users
+                ], 200);
+            }
         } else {
-            return response()->json([
-                'success' => true,
-                'message' => 'User berhasil diubah',
-                'data' => $users
-            ], 200);
+            // $exploded = explode(',', $user_photo_ktp);
+
+            // $decoded = base64_decode($exploded[1]);
+
+            // if (str_contains($exploded[0], 'jpeg')) {
+            //     $extension = 'jpg';
+            // } else {
+            //     $extension = 'png';
+            // }
+
+            // $filename = time() . str_random() . '.' . $extension;
+
+            // $path = public_path() . '/upload/image/' . $filename;
+
+            // if (file_put_contents($path, $decoded)) {
+            $filename1 = uniqid() . $user_photo_ktp->getClientOriginalName();
+            $filename2 = uniqid() . $user_photo->getClientOriginalName();
+            if (($user_photo_ktp->move(storage_path('') . '/../public/upload/image/', $filename1)) && ($user_photo->move(storage_path('') . '/../public/upload/image/', $filename2))) {
+
+                $user = DB::table('users')->where('id', $id)->first();
+                $old_photo_ktp = $user->user_photo_ktp;
+                $old_photo = $user->user_photo;
+
+                $user = DB::table('users')->where('id', $id)->first();
+                $old_photo_ktp = storage_path('') . '/../public/upload/image/' . $user->user_photo_ktp;
+                $old_photo = storage_path('') . '/../public/upload/image/' . $user->user_photo;
+                if (file_exists($old_photo_ktp) || file_exists($old_photo)) {
+                    @unlink($old_photo_ktp);
+                    @unlink($old_photo);
+                }
+
+                $users = User::find($id);
+                $users->position_id = $request->position_id;
+                $users->username = $request->username;
+                $users->password = Hash::make($request->password);
+                $users->user_fullname = $request->user_fullname;
+                $users->user_email = $request->user_email;
+                $users->user_phone_number = $request->user_phone_number;
+                $users->user_ktp = $request->user_ktp;
+                $users->user_photo_ktp = $filename1;
+                $users->user_photo = $filename2;
+                $users->save();
+
+                if (!$users) {
+                    return response()->json([
+                        'success'   => false,
+                        'message'   => 'User gagal diubah',
+                        'data'      => ''
+                    ], 401);
+                } else {
+                    return response()->json([
+                        'success'   => true,
+                        'message'   => 'User berhasil diubah',
+                        'data'      => $users
+                    ], 200);
+                }
+            } else {
+                return response()->json([
+                    'success'   => false,
+                    'message'   => 'Gambar gagal diubah',
+                    'data'      => ''
+                ], 400);
+            }
         }
     }
 
-    public function delete(Request $request, $id)
+    public function delete($id)
     {
+
+        $user = DB::table('users')->where('id', $id)->first();
+        $old_photo_ktp = storage_path('') . '/../public/upload/image/' . $user->user_photo_ktp;
+        $old_photo = storage_path('') . '/../public/upload/image/' . $user->user_photo;
+        if (file_exists($old_photo_ktp) || file_exists($old_photo)) {
+            @unlink($old_photo_ktp);
+            @unlink($old_photo);
+        }
+
         $users = DB::table('users')->where('id', $id)->delete();
 
         if (!$users) {

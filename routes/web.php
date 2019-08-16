@@ -21,7 +21,7 @@ $router->post('/logout', 'AuthController@postLogout');
 $router->group(['prefix' => 'v1'], function () use ($router) {
     $router->get('/users', 'UsersController@index');
     $router->post('/users', 'UsersController@store');
-    $router->patch('/users/{id}', 'UsersController@update');
+    $router->post('/users/{id}', 'UsersController@update');
     $router->delete('/users/{id}', 'UsersController@delete');
     $router->get('/admins', 'AdminsController@index');
     $router->post('/admins', 'AdminsController@store');
