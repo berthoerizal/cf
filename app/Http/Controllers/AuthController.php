@@ -2,57 +2,124 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Tymon\JWTAuth\JWTAuth;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use App\User;
+use App\Admin;
+use Validator;
 
 class AuthController extends Controller
 {
     /**
-     * @var \Tymon\JWTAuth\JWTAuth
+     * Create a new controller instance.
+     *
+     * @return void
      */
-    protected $jwt;
-
-    public function __construct(JWTAuth $jwt)
+    public function __construct()
     {
-        $this->jwt = $jwt;
-        $this->middleware('jwt.auth', ['except' => ['postLogin']]);
+        $this->middleware('auth',  ['except' => ['login']]);
     }
 
-    public function postLogin(Request $request)
+    public function logout(Request $request)
+    {
+        $api_token = $request->json()->get('api_token');
+
+        $user = User::where('api_token', $api_token)->first();
+
+        if (!$user) {
+            $admin = Admin::where('api_token', $api_token)->first();
+            if (!$admin) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Logout gagal',
+                    'data' => ''
+                ], 400);
+            } else {
+                $admin->api_token = NULL;
+                $admin->save();
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Logout admin berhasil',
+                    'data' => ''
+                ], 200);
+            }
+        } else {
+            $user->api_token = NULL;
+            $user->save();
+            return response()->json([
+                'success' => true,
+                'message' => 'Logout user berhasil',
+                'user' => ''
+            ], 200);
+        }
+    }
+
+    public function login(Request $request)
     {
         $username = $request->json()->get('username');
         $password = $request->json()->get('password');
 
-        try {
-            $user_login = ['username' => $username, 'password' => $password];
-            if (!$token = $this->jwt->attempt($user_login)) {
-                return response()->json(['user_not_found'], 404);
+        $validator = Validator::make(
+            [
+                'username' => $username,
+                'password' => $password
+            ],
+            [
+                'username' => 'required',
+                'password' => 'required|min:6|max:12',
+            ]
+        );
+
+        if ($validator->fails()) {
+            // The given data did not pass validation
+            return response()->json($validator->errors(), 422);
+        } else {
+            $user = User::where('username', $username)->first();
+
+            if (!$user) {
+                $admin = Admin::where('username', $username)->first();
+                if (Hash::check($password, $admin->password)) {
+                    $apiToken = base64_encode(str_random(40));
+
+                    $admin->update([
+                        'api_token' => $apiToken
+                    ]);
+
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Login admin Berhasil',
+                        'admin' => $admin
+                    ], 201);
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Login Gagal',
+                        'data' => ''
+                    ], 400);
+                }
             } else {
-                $user = User::where('username', $username)->first();
-                $user->update([
-                    'api_token' => $token
-                ]);
+
+                if (Hash::check($password, $user->password)) {
+                    $apiToken = base64_encode(str_random(40));
+
+                    $user->update([
+                        'api_token' => $apiToken
+                    ]);
+
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Login user Berhasil',
+                        'user' => $user
+                    ], 201);
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Login Gagal',
+                        'data' => ''
+                    ], 400);
+                }
             }
-        } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
-
-            return response()->json(['token_expired'], 500);
-        } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
-
-            return response()->json(['token_invalid'], 500);
-        } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
-
-            return response()->json(['token_absent' => $e->getMessage()], 500);
         }
-
-        return response()->json(compact('token'));
-    }
-
-    public function postLogout()
-    {
-        Auth::logout();
-        return response()->json(['message' => 'Successfully logged out']);
     }
 }

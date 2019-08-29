@@ -16,7 +16,7 @@ class InvestsController extends Controller
      */
     public function __construct()
     {
-        // $this->middleware('jwt.auth');
+        $this->middleware('auth');
     }
 
     public function index()
@@ -27,7 +27,7 @@ class InvestsController extends Controller
             // ->select('invests.*', 'projects.id as project_id', 'users.id as user_id')
             ->get();
 
-        if(!$index){
+        if (!$index) {
             return response()->json([
                 'success' => false,
                 'message' => 'invests gagal ditampilkan',
@@ -48,7 +48,7 @@ class InvestsController extends Controller
         $user_id    = $request->json()->get('user_id');
         $invest_paid_capital = $request->json()->get('invest_paid_capital');
         $invest_duration = $request->json()->get('invest_duration');
-        
+
         $store = DB::table('invests')->insert([
             'project_id' => $project_id,
             'user_id' => $user_id,
@@ -56,7 +56,7 @@ class InvestsController extends Controller
             'invest_duration' => $invest_duration
         ]);
 
-        if(!$store){
+        if (!$store) {
             return response()->json([
                 'success' => false,
                 'message' => 'invest gagal ditambahkan',

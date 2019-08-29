@@ -16,7 +16,7 @@ class InstallmentsController extends Controller
      */
     public function __construct()
     {
-        // $this->middleware('jwt.auth');
+        $this->middleware('auth');
     }
 
     public function index()
@@ -52,7 +52,7 @@ class InstallmentsController extends Controller
         $i_date =  $request->json()->get('i_date');
         $i_date_pay = $request->json()->get('i_date_pay');
         $i_status = $request->json()->get('i_status');
-        
+
         $store = DB::table('installments')->insert([
             'invest_id' => $invest_id,
             'i_no' => $i_no,

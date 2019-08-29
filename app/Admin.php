@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 
-class User extends Model implements AuthenticatableContract, AuthorizableContract
+class Admin extends Model implements AuthenticatableContract, AuthorizableContract
 {
     use Authenticatable, Authorizable;
 
@@ -18,7 +18,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * @var array
      */
     protected $fillable = [
-        'position_id', 'username', 'password', 'api_token', 'user_fullname', 'user_email', 'user_phone_number', 'user_ktp', 'user_photo_ktp', 'user_photo'
+        'group_id', 'username', 'password', 'api_token', 'admin_email', 'admin_name', 'admin_phone_number'
     ];
 
     /**
